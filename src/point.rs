@@ -6,19 +6,19 @@ pub struct Point {
 
 impl Point {
     pub fn new(x: i32, y: i32) -> Point {
-        Point { x: i32, y: i32 }
+        Point { x: x, y: y }
     }
 }
 
 
 impl Add<Point, Point> for Point {
-    pub fn add(&self, rhs: &Point) -> Point {
+    fn add(&self, rhs: &Point) -> Point {
         Point::new(self.x + rhs.x, self.y + rhs.y)
     }
 }
 
 impl Sub<Point, Point> for Point {
-    pub fn sub(&self, rhs: &Point) -> Point {
+    fn sub(&self, rhs: &Point) -> Point {
         Point::new(self.x - rhs.x, self.y - rhs.y)
     }
 }

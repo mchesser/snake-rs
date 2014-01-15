@@ -1,99 +1,116 @@
-// Graphics library imports
-extern mod rsfml;
-use rsfml::graphics::{RenderWindow, sfClose, Color, RectangleShape};
-use rsfml::window::{VideoMode, ContextSettings, event, keyboard};
-use rsfml::system::{Vector2f, Clock};
+extern mod native;
+extern mod sdl2;
 
-use point::Point;
+use sdl2::{video, render, keycode, timer, event};
+use sdl2::rect::Rect;
+
+use game::Game;
 
 mod snake;
 mod game;
 mod point;
 
-// Run on main thread for MacOS
-#[cfg(target_os="macos")]
 #[start]
 fn start(argc: int, argv: **u8) -> int {
-    std::rt::start_on_main_thread(argc, argv, main)
+    native::start(argc, argv, main)
 }
 
+#[main]
 fn main() {
+    static WHITE: sdl2::pixels::Color = sdl2::pixels::RGB(0xFF, 0xFF, 0xFF);
+    static BLACK: sdl2::pixels::Color = sdl2::pixels::RGB(0x00, 0x00, 0x00);
+    static GREEN: sdl2::pixels::Color = sdl2::pixels::RGB(0x60, 0xAA, 0x60);
+    static RED: sdl2::pixels::Color = sdl2::pixels::RGB(0xAA, 0x60, 0x60);
+    
     let game_width = 800;
     let game_height = 600;
-    let grid_size = 20;
+    let grid_size: i32 = 20;
+    
+    sdl2::init([sdl2::InitVideo]);
     
     // Initialise the window
-    let settings = ContextSettings::default();
-    let mut window = RenderWindow::new(
-            VideoMode::new_init(game_width, game_height, 32),
-            "Simple Snake Game", sfClose, &settings).unwrap();
+    let window =
+        match video::Window::new("Simple Snake Game", video::PosCentered, 
+            video::PosCentered, game_width, game_height, [video::OpenGL]) { 
+        Ok(window) => window,
+        Err(err) => fail!(format!("failed to create window: {}", err))
+    };
     
-    window.set_vertical_sync_enabled(true);
-    
+    // Initialise the renderer
+    let renderer = 
+        match render::Renderer::from_window(window, render::DriverAuto, [render::Accelerated]) {
+        Ok(renderer) => renderer,
+        Err(err) => fail!(format!("failed to create renderer: {}", err))
+    };
+
     // Initialise the game
-    let mut game = Game::init(game_width/grid_size, game_height/grid_size);
+    let mut game = Game::init((game_width/grid_size as int) as uint,
+        (game_height/grid_size as int) as uint);
+        
+    let mut prev_ticks = timer::get_ticks();
     
-    let mut clock = Clock::new();
-    
-    // Initialise drawing rectangle
-    let mut rect = RectangleShape::new().unwrap();
-    rect.set_size(&Vector2f { x: grid_size as f32, y: grid_size as f32 });
-    rect.set_outline_thickness(0.0);
-    rect.set_fill_color(&Color::new_RGB(100, 100, 200));
-    
-    // Game loop
-    while window.is_open() && game.player.dead == false {
-        // Event loop
-        loop {
-            match window.poll_event() {
-                event::Closed => window.close(),
-            
-                event::KeyPressed{code, ..} => match code {
-                    // Game exit
-                    keyboard::Escape => { window.close(); break; },
-                
-                    // Player movement
-                    keyboard::Up    => game.player.set_move(snake::Up),
-                    keyboard::Down  => game.player.set_move(snake::Down),
-                    keyboard::Left  => game.player.set_move(snake::Left),
-                    keyboard::Right => game.player.set_move(snake::Right),
-                
-                    // Anything else
-                    _ => {}
+    'main: loop {
+        'event: loop {
+            match event::poll_event() {
+                event::QuitEvent(_) => break 'main,
+               
+                event::KeyDownEvent(_, _, code, _, _) => {
+                    match code {
+                        // Game exit
+                        keycode::EscapeKey => break 'main,
+                        
+                        // Player movement
+                        keycode::UpKey    => game.snakes[0].set_move(game::snake::Up),
+                        keycode::DownKey  => game.snakes[0].set_move(game::snake::Down),
+                        keycode::LeftKey  => game.snakes[0].set_move(game::snake::Left),
+                        keycode::RightKey => game.snakes[0].set_move(game::snake::Right),
+                        
+                        // Anything else
+                        _ => {}
+                    }
                 },
-            
+                
                 event::NoEvent => break,
-            
+                
                 _ => {}
             }
         }
         
+        let ticks = timer::get_ticks();
+        let dt = (ticks - prev_ticks) as f32 / 1000.0;
+        prev_ticks = ticks;
+        
         // Update the game
-        let dt = clock.restart().as_seconds();
         game.update(dt);
-        
-        //----------| Draw Code |----------//
-        // Clear the screen
-        window.clear(&Color::new_RGB(0xFF, 0xFF, 0xFF));
-        
-        // Draw fruit
-        rect.set_position(&(Vector2f::new((grid_size*game.fruit.x as uint) as f32,
-                (grid_size*game.fruit.y as uint) as f32)));
-        window.draw(&rect);
-        
-        // Draw the snake
-        let head = game.player.get_head();
-        rect.set_position(&(Vector2f::new((grid_size*head.x as uint) as f32,
-                (grid_size*head.y as uint) as f32)));
-        window.draw(&rect);
-        
-        let tail_components = game.player.tail_to_points();
-        for component in tail_components.iter() {
-            rect.set_position(&(Vector2f::new((grid_size*component.x as uint) as f32,
-                    (grid_size*component.y as uint) as f32)));
-            window.draw(&rect);
+        if game.snakes[0].dead {
+            break 'main;
         }
         
-        window.display();
-    }   
+        // Clear the screen
+        renderer.set_draw_color(WHITE);
+        renderer.clear();     
+        
+        // Draw the fruit
+        renderer.set_draw_color(RED);  
+        renderer.fill_rect(&Rect::new(
+            grid_size*game.fruit.x, grid_size*game.fruit.y, grid_size, grid_size)
+        );
+        
+        // Draw the snake
+        renderer.set_draw_color(GREEN);  
+        let head = game.snakes[0].get_head();
+        renderer.fill_rect(&Rect::new(
+            grid_size*head.x, grid_size*head.y, grid_size, grid_size)
+        );
+        
+        let tail_components = game.snakes[0].tail_to_points();
+        for component in tail_components.iter() {
+            renderer.fill_rect(&Rect::new(
+                grid_size*component.x, grid_size*component.y, grid_size, grid_size)
+            );
+        }
+        
+        // Refresh the screen
+        renderer.present();
+    }
 }

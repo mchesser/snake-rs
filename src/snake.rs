@@ -11,7 +11,7 @@ pub enum Move {
     Right
 }
 
-struct Snake {
+pub struct Snake {
     priv pos          : Point,
     priv tail         : ~[Move],
     priv current_move : Move,
@@ -27,7 +27,7 @@ impl Snake {
     /// direction and speed
     pub fn init(pos: Point, start_dir: Move, move_delay: f32) -> Snake {
         Snake {
-            pos          : Point,
+            pos          : pos,
             tail         : box [start_dir, start_dir, start_dir],
             current_move : start_dir,
             next_move    : start_dir,
@@ -40,7 +40,7 @@ impl Snake {
     
     /// Initialise a snake with 3 segments with default speed and direction
     pub fn init_with_defaults(pos: Point) -> Snake {
-        Snake::init(pos, RIGHT, 0.05)
+        Snake::init(pos, Right, 0.05)
     }
     
     /// Add a new segment to the end of the snake
@@ -123,12 +123,12 @@ impl Snake {
          * the position of next block to the segment. */
         let mut next = self.pos;
         for segment in self.tail.iter() {
-            next += 
+            next = 
                 match *segment {
-                    Up    => Point::new(0, 1),
-                    Down  => Point::new(0, -1),
-                    Left  => Point::new(1, 0),
-                    Right => Point::new(-1, 0)
+                    Up    => next + Point::new(0, 1),
+                    Down  => next + Point::new(0, -1),
+                    Left  => next + Point::new(1, 0),
+                    Right => next + Point::new(-1, 0)
                 };
             acc.push(next);
         }
@@ -140,20 +140,20 @@ impl Snake {
 mod tests {
     #[test]
     fn test_tail_to_points() {
-        let snake = init(Point::new(10, 10), RIGHT, 0.05);
+        let snake = init(Point::new(10, 10), Right, 0.05);
         assert_eq!(snake.tail_to_points(), 
             ~[Point::new(9, 10), Point::new(8, 10), Point::new(7, 10)])
     }
     
     #[test]
     fn test_get_head() {
-        let snake = init(Point::new(10, 10), RIGHT, 0.05);
+        let snake = init(Point::new(10, 10), Right, 0.05);
         assert_eq!(snake.get_head(), Point::new(10, 10));
     }
     
     #[test]
     fn test_update_same_direction() {
-        let mut snake = init(Point::new(10, 10), RIGHT, 1.0);
+        let mut snake = init(Point::new(10, 10), Right, 1.0);
         snake.update(1.0);
         assert_eq!(snake.get_head(), Point::new(11, 10));
         assert_eq!(snake.tail_to_points(), 
@@ -162,8 +162,8 @@ mod tests {
     
     #[test]
     fn test_update_different_direction() {
-        let mut snake = init(Point::new(10, 10), RIGHT, 1.0);
-        snake.set_move(DOWN);
+        let mut snake = init(Point::new(10, 10), Right, 1.0);
+        snake.set_move(Down);
         snake.update(1.0);
         assert_eq!(snake.get_head(), Point::new(10, 11));
         assert_eq!(snake.tail_to_points(),

@@ -1,14 +1,11 @@
-extern mod rsfml;
-use rsfml::graphics::{RenderWindow, sfClose, Color, RectangleShape};
-
 use std::rand::{task_rng, Rng};
 use point::Point;
 
-mod snake;
+pub mod snake;
 mod point;
 
 // Game structure
-struct Game {
+pub struct Game {
     snakes: ~[snake::Snake],
     fruit : Point,
     width : uint,
@@ -25,24 +22,24 @@ impl Game {
             height: height
         };
         
-        game.fruit = self.rand_grid_point();
+        game.fruit = game.rand_grid_point();
         return game;
     }
     
     /// Updates the game using the time elapsed since the last update
     pub fn update(&mut self, elapsed_time: f32) {
-        self.player.update(elapsed_time);
-        let collision = self.player.check_collision(self.width, self.height,
-                self.player.tail_to_points());
+        self.snakes[0].update(elapsed_time);
+        let collision = self.snakes[0].check_collision(self.width, self.height,
+                self.snakes[0].tail_to_points());
         
         if collision {
-            self.player.dead = true;
+            self.snakes[0].dead = true;
         }
         
-        let player_head = self.player.get_head();
+        let player_head = self.snakes[0].get_head();
         if player_head == self.fruit {
-            self.player.score += 10;
-            self.player.add_segment();
+            self.snakes[0].score += 10;
+            self.snakes[0].add_segment();
             self.new_fruit();
         }
     }
@@ -50,8 +47,8 @@ impl Game {
     // Generates a random point on the grid
     fn rand_grid_point(&self) -> Point {
        Point::new(
-            (task_rng().gen::<uint>() % self.width) as int,
-            (task_rng().gen::<uint>() % self.height) as int
+            (task_rng().gen::<uint>() % self.width) as i32,
+            (task_rng().gen::<uint>() % self.height) as i32
         )
     }
     
@@ -61,12 +58,12 @@ impl Game {
         //        components instead of allocating vectors.
         let mut walls = box [];
         for snake in self.snakes.iter() {
-            walls.append(snake.tail_to_points());
+            walls.push_all(snake.tail_to_points());
             walls.push(snake.get_head());
         }
         
         // Move until the fruit is not covered by the snake
-        while walls.iter().any(|w| self.fruit == w) {
+        while walls.iter().any(|&w| self.fruit == w) {
             self.fruit = self.rand_grid_point();
         }
     }
