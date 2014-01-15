@@ -136,3 +136,35 @@ impl Snake {
         return acc;
     }
 }
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn test_tail_to_points() {
+        let snake = init(10, 10, RIGHT, 0.05);
+        assert_eq!(snake.tail_to_points(), ~[[9, 10], [8, 10], [7,10]])
+    }
+    
+    #[test]
+    fn test_get_head() {
+        let snake = init(10, 10, RIGHT, 0.05);
+        assert_eq!(snake.get_head(), [10, 10]);
+    }
+    
+    #[test]
+    fn test_update_same_direction() {
+        let mut snake = init(10, 10, RIGHT, 1.0);
+        snake.update(1.0);
+        assert_eq!(snake.get_head(), [11, 10]);
+        assert_eq!(snake.tail_to_points(), ~[[10, 10], [9, 10], [8,10]]);
+    }
+    
+    #[test]
+    fn test_update_different_direction() {
+        let mut snake = init(10, 10, RIGHT, 1.0);
+        snake.set_move(DOWN);
+        snake.update(1.0);
+        assert_eq!(snake.get_head(), [10, 11]);
+        assert_eq!(snake.tail_to_points(), ~[[10, 10], [9, 10], [8,10]]);
+    }
+}
