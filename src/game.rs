@@ -2,13 +2,15 @@ extern mod rsfml;
 use rsfml::graphics::{RenderWindow, sfClose, Color, RectangleShape};
 
 use std::rand::{task_rng, Rng};
+use point::Point;
 
 mod snake;
+mod point;
 
 // Game structure
 struct Game {
     snakes: ~[snake::Snake],
-    fruit : [uint,..2],
+    fruit : Point,
     width : uint,
     height: uint,
 }
@@ -17,8 +19,8 @@ impl Game {
     /// Initialises the game
     pub fn init(width: uint, height: uint) -> Game {
         let mut game = Game {
-            snakes: box [snake::Snake::init_with_defaults(5, 5)],
-            fruit: [0, 0],
+            snakes: box [snake::Snake::init_with_defaults(Point::new(5, 5))],
+            fruit: Point::new(0, 0),
             width: width,
             height: height
         };
@@ -38,18 +40,19 @@ impl Game {
         }
         
         let player_head = self.player.get_head();
-        if player_head[0] == self.fruit[0] && player_head[1] == self.fruit[1] {
+        if player_head == self.fruit {
             self.player.score += 10;
             self.player.add_segment();
             self.new_fruit();
         }
     }
     
-    fn rand_grid_point(&self) -> [uint,..2] {
-        [
-            task_rng().gen::<uint>() % self.width,
-            task_rng().gen::<uint>() % self.height
-        ]
+    // Generates a random point on the grid
+    fn rand_grid_point(&self) -> Point {
+       Point::new(
+            (task_rng().gen::<uint>() % self.width) as int,
+            (task_rng().gen::<uint>() % self.height) as int
+        )
     }
     
     /// Randomizes the position of the fruit
@@ -63,7 +66,7 @@ impl Game {
         }
         
         // Move until the fruit is not covered by the snake
-        while walls.iter().any(|w| self.fruit[0] == w[0] && self.fruit[1] == w[1]) {
+        while walls.iter().any(|w| self.fruit == w) {
             self.fruit = self.rand_grid_point();
         }
     }

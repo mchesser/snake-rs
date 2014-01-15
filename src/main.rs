@@ -4,8 +4,11 @@ use rsfml::graphics::{RenderWindow, sfClose, Color, RectangleShape};
 use rsfml::window::{VideoMode, ContextSettings, event, keyboard};
 use rsfml::system::{Vector2f, Clock};
 
+use point::Point;
+
 mod snake;
 mod game;
+mod point;
 
 // Run on main thread for MacOS
 #[cfg(target_os="macos")]
@@ -74,28 +77,23 @@ fn main() {
         window.clear(&Color::new_RGB(0xFF, 0xFF, 0xFF));
         
         // Draw fruit
-        rect.set_position(&(Vector2f::new((grid_size*game.fruit[0]) as f32,
-                (grid_size*game.fruit[1]) as f32)));
+        rect.set_position(&(Vector2f::new((grid_size*game.fruit.x as uint) as f32,
+                (grid_size*game.fruit.y as uint) as f32)));
         window.draw(&rect);
         
         // Draw the snake
         let head = game.player.get_head();
-        rect.set_position(&(Vector2f::new((grid_size*head[0]) as f32,
-                (grid_size*head[1]) as f32)));
+        rect.set_position(&(Vector2f::new((grid_size*head.x as uint) as f32,
+                (grid_size*head.y as uint) as f32)));
         window.draw(&rect);
         
         let tail_components = game.player.tail_to_points();
         for component in tail_components.iter() {
-            rect.set_position(&(Vector2f::new((grid_size*component[0]) as f32,
-                    (grid_size*component[1]) as f32)));
+            rect.set_position(&(Vector2f::new((grid_size*component.x as uint) as f32,
+                    (grid_size*component.y as uint) as f32)));
             window.draw(&rect);
         }
         
         window.display();
     }   
 }
-
-fn draw_game(client: &Client, window: &Window) {
-    
-    
-} 
