@@ -138,22 +138,24 @@ impl Snake {
 
 #[cfg(test)]
 mod tests {
+    use point::Point;
+    
     #[test]
     fn test_tail_to_points() {
-        let snake = init(Point::new(10, 10), Right, 0.05);
+        let snake = Snake::init(Point::new(10, 10), Right, 0.05);
         assert_eq!(snake.tail_to_points(), 
             ~[Point::new(9, 10), Point::new(8, 10), Point::new(7, 10)])
     }
     
     #[test]
     fn test_get_head() {
-        let snake = init(Point::new(10, 10), Right, 0.05);
+        let snake = Snake::init(Point::new(10, 10), Right, 0.05);
         assert_eq!(snake.get_head(), Point::new(10, 10));
     }
     
     #[test]
     fn test_update_same_direction() {
-        let mut snake = init(Point::new(10, 10), Right, 1.0);
+        let mut snake = Snake::init(Point::new(10, 10), Right, 1.0);
         snake.update(1.0);
         assert_eq!(snake.get_head(), Point::new(11, 10));
         assert_eq!(snake.tail_to_points(), 
@@ -162,7 +164,7 @@ mod tests {
     
     #[test]
     fn test_update_different_direction() {
-        let mut snake = init(Point::new(10, 10), Right, 1.0);
+        let mut snake = Snake::init(Point::new(10, 10), Right, 1.0);
         snake.set_move(Down);
         snake.update(1.0);
         assert_eq!(snake.get_head(), Point::new(10, 11));

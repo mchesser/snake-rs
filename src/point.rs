@@ -26,6 +26,8 @@ impl Sub<Point, Point> for Point {
 
 #[cfg(test)]
 mod tests {
+    use point::Point;
+    
     #[test]
     fn test_eq() {
         assert!(Point::new(1, 1) == Point::new(1, 1));
