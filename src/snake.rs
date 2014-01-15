@@ -1,4 +1,7 @@
 use std::vec;
+use point::Point;
+
+mod point;
 
 #[deriving(Eq)]
 pub enum Move {
@@ -9,8 +12,7 @@ pub enum Move {
 }
 
 struct Snake {
-    priv x            : uint,
-    priv y            : uint,
+    priv pos          : Point,
     priv tail         : ~[Move],
     priv current_move : Move,
     priv next_move    : Move,
@@ -23,10 +25,9 @@ struct Snake {
 impl Snake {
     /// Initialise a snake with 3 segments starting with a specified start 
     /// direction and speed
-    pub fn init(x: uint, y: uint, start_dir: Move, move_delay: f32) -> Snake {
+    pub fn init(pos: Point, start_dir: Move, move_delay: f32) -> Snake {
         Snake {
-            x            : x,
-            y            : y,
+            pos          : Point,
             tail         : box [start_dir, start_dir, start_dir],
             current_move : start_dir,
             next_move    : start_dir,
@@ -38,8 +39,8 @@ impl Snake {
     }
     
     /// Initialise a snake with 3 segments with default speed and direction
-    pub fn init_with_defaults(x: uint, y: uint) -> Snake {
-        Snake::init(x, y, RIGHT, 0.05)
+    pub fn init_with_defaults(pos: Point) -> Snake {
+        Snake::init(pos, RIGHT, 0.05)
     }
     
     /// Add a new segment to the end of the snake
@@ -57,10 +58,10 @@ impl Snake {
             
             // Move the head based on the direction
             match self.next_move {
-                Up    => self.y -= 1,
-                Down  => self.y += 1,
-                Left  => self.x -= 1,
-                Right => self.x += 1
+                Up    => self.pos.y -= 1,
+                Down  => self.pos.y += 1,
+                Left  => self.pos.x -= 1,
+                Right => self.pos.x += 1
             }
             
             // Move the rest of the components
@@ -82,28 +83,26 @@ impl Snake {
     /// # Return
     /// `true` if the snake hits anything, `false` otherwise.
     pub fn check_collision(&self, map_width: uint, map_height: uint,
-            walls: &[[uint,..2]]) -> bool 
-    {
+            walls: &[Point]) -> bool {
         // Check map bounds
-        if (self.x < 0 || self.y < 0 ||
-                self.x >= map_width || self.y >= map_height) 
-        {
+        if (self.pos.x < 0 || self.pos.y < 0 ||
+                self.pos.x >= map_width as i32|| self.pos.y >= map_height as i32) {
             return true;
         }
     
         // Check obstacles
-        for wall in walls.iter() {
-            if (self.x == wall[0] && self.y == wall[1]) {
+        for &wall in walls.iter() {
+            if self.pos == wall {
                 return true;
             }
         }
         
-        return false;
+        false
     }
     
     /// Get the position of the snake's head.
-    pub fn get_head(&self) -> [uint,..2] {
-        [self.x, self.y]
+    pub fn get_head(&self) -> Point {
+        self.pos
     }
     
     /// Sets the snake's next move, if possible
@@ -117,19 +116,19 @@ impl Snake {
     }
     
     /// Converts the tail of the snake to a vector of points.
-    pub fn tail_to_points(&self) -> ~[[uint,..2]] {
+    pub fn tail_to_points(&self) -> ~[Point] {
         let mut acc = vec::with_capacity(self.tail.len());
         
         /* Note: segment directions point to the position of the next block, not
          * the position of next block to the segment. */
-        let mut next = [self.x, self.y];
+        let mut next = self.pos;
         for segment in self.tail.iter() {
-            next = 
+            next += 
                 match *segment {
-                    Up    => [next[0], next[1] + 1],
-                    Down  => [next[0], next[1] - 1],
-                    Left  => [next[0] + 1, next[1]],
-                    Right => [next[0] - 1, next[1]]
+                    Up    => Point::new(0, 1),
+                    Down  => Point::new(0, -1),
+                    Left  => Point::new(1, 0),
+                    Right => Point::new(-1, 0)
                 };
             acc.push(next);
         }
@@ -141,30 +140,33 @@ impl Snake {
 mod tests {
     #[test]
     fn test_tail_to_points() {
-        let snake = init(10, 10, RIGHT, 0.05);
-        assert_eq!(snake.tail_to_points(), ~[[9, 10], [8, 10], [7,10]])
+        let snake = init(Point::new(10, 10), RIGHT, 0.05);
+        assert_eq!(snake.tail_to_points(), 
+            ~[Point::new(9, 10), Point::new(8, 10), Point::new(7, 10)])
     }
     
     #[test]
     fn test_get_head() {
-        let snake = init(10, 10, RIGHT, 0.05);
-        assert_eq!(snake.get_head(), [10, 10]);
+        let snake = init(Point::new(10, 10), RIGHT, 0.05);
+        assert_eq!(snake.get_head(), Point::new(10, 10));
     }
     
     #[test]
     fn test_update_same_direction() {
-        let mut snake = init(10, 10, RIGHT, 1.0);
+        let mut snake = init(Point::new(10, 10), RIGHT, 1.0);
         snake.update(1.0);
-        assert_eq!(snake.get_head(), [11, 10]);
-        assert_eq!(snake.tail_to_points(), ~[[10, 10], [9, 10], [8,10]]);
+        assert_eq!(snake.get_head(), Point::new(11, 10));
+        assert_eq!(snake.tail_to_points(), 
+            ~[Point::new(10, 10), Point::new(9, 10), Point::new(9, 10)]);
     }
     
     #[test]
     fn test_update_different_direction() {
-        let mut snake = init(10, 10, RIGHT, 1.0);
+        let mut snake = init(Point::new(10, 10), RIGHT, 1.0);
         snake.set_move(DOWN);
         snake.update(1.0);
-        assert_eq!(snake.get_head(), [10, 11]);
-        assert_eq!(snake.tail_to_points(), ~[[10, 10], [9, 10], [8,10]]);
+        assert_eq!(snake.get_head(), Point::new(10, 11));
+        assert_eq!(snake.tail_to_points(),
+            ~[Point::new(10, 10), Point::new(9, 10), Point::new(9, 10)]);
     }
 }
