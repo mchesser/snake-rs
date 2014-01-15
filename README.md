@@ -3,6 +3,7 @@ Snake Rust
 
 A simple game to test some graphics stuff with Rust.
 
+![Screenshot](preview/preview.png)
 
 ## Plans
 * Basic network multiplayer (waiting on [#11165](https://github.com/mozilla/rust/issues/11165) )
