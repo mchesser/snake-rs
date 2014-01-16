@@ -13,6 +13,7 @@ A simple game to test some graphics stuff with Rust.
 
 ### Windows
 The easiest way to compile on windows is to do the following:
+
 1. Install [SDL2-devel-2.0.1-mingw](http://libsdl.org/download-2.0.php)
 2. Download [rust-sdl2](https://github.com/AngryLawyer/rust-sdl2)
 3. Navigate to /rust-sdl2-master/src/sdl2/ 
