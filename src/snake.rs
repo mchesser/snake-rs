@@ -138,6 +138,7 @@ impl Snake {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     use point::Point;
 
     #[test]
@@ -159,7 +160,7 @@ mod tests {
         snake.update(1.0);
         assert_eq!(snake.get_head(), Point::new(11, 10));
         assert_eq!(snake.tail_to_points(),
-            ~[Point::new(10, 10), Point::new(9, 10), Point::new(9, 10)]);
+            ~[Point::new(10, 10), Point::new(9, 10), Point::new(8, 10)]);
     }
 
     #[test]
@@ -169,6 +170,6 @@ mod tests {
         snake.update(1.0);
         assert_eq!(snake.get_head(), Point::new(10, 11));
         assert_eq!(snake.tail_to_points(),
-            ~[Point::new(10, 10), Point::new(9, 10), Point::new(9, 10)]);
+            ~[Point::new(10, 10), Point::new(9, 10), Point::new(8, 10)]);
     }
 }

@@ -68,18 +68,19 @@ impl Game {
 
     /// Updates the game using the time elapsed since the last update
     pub fn update(&mut self, elapsed_time: f32) {
-        for snake in self.snake.mut_iter() {
-            snake.update(elapsed_time);
-            let collision = snake.check_collision(self.width, self.height, snake.tail_to_points());
+        for i in range(0, self.snakes.len()) {
+            self.snakes[i].update(elapsed_time);
+            let collision = self.snakes[i].check_collision(self.width, self.height,
+                self.snakes[i].tail_to_points());
 
             if collision {
-                snake.dead = true;
+                self.snakes[i].dead = true;
             }
 
-            let head = snake.get_head();
+            let head = self.snakes[i].get_head();
             if head == self.fruit {
-                snake.score += 10;
-                snake.add_segment();
+                self.snakes[i].score += 10;
+                self.snakes[i].add_segment();
                 self.new_fruit();
             }
         }

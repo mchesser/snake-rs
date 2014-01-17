@@ -1,3 +1,5 @@
+#[feature(globs)];
+
 extern mod native;
 extern mod sdl2;
 
@@ -10,6 +12,7 @@ mod snake;
 mod game;
 mod point;
 
+#[cfg(not(test))]
 #[start]
 fn start(argc: int, argv: **u8) -> int {
     native::start(argc, argv, main)
@@ -92,4 +95,8 @@ fn main() {
         // Refresh the screen
         renderer.present();
     }
+}
+
+#[cfg(test)]
+mod tests {
 }
