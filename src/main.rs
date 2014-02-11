@@ -4,11 +4,9 @@ extern mod native;
 extern mod sdl2;
 
 use sdl2::{video, render, keycode, timer, event};
-use sdl2::rect::Rect;
 
 use game::Game;
 
-mod snake;
 mod game;
 mod point;
 
@@ -44,7 +42,7 @@ fn main() {
     };
 
     // Initialise the game
-    let mut game = Game::init(game_width/grid_size, game_height/grid_size, grid_size);
+    let mut game = Game::new(game_width/grid_size, game_height/grid_size, grid_size);
 
     let mut prev_ticks = timer::get_ticks();
 

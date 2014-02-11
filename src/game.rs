@@ -19,9 +19,9 @@ pub struct Game {
 
 impl Game {
     /// Initialises the game
-    pub fn init(width: u32, height: u32, grid_size: u32) -> Game {
+    pub fn new(width: u32, height: u32, grid_size: u32) -> Game {
         let mut game = Game {
-            snakes: box [snake::Snake::init_with_defaults(Point::new(5, 5))],
+            snakes: box [snake::Snake::new_with_defaults(Point::new(5, 5))],
             fruit: Point::new(0, 0),
             width: width,
             height: height,

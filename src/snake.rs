@@ -25,7 +25,7 @@ pub struct Snake {
 impl Snake {
     /// Initialise a snake with 3 segments starting with a specified start
     /// direction and speed
-    pub fn init(pos: Point, start_dir: Move, move_delay: f32) -> Snake {
+    pub fn new(pos: Point, start_dir: Move, move_delay: f32) -> Snake {
         Snake {
             pos          : pos,
             tail         : box [start_dir, start_dir, start_dir],
@@ -39,13 +39,13 @@ impl Snake {
     }
 
     /// Initialise a snake with 3 segments with default speed and direction
-    pub fn init_with_defaults(pos: Point) -> Snake {
-        Snake::init(pos, Right, 0.05)
+    pub fn new_with_defaults(pos: Point) -> Snake {
+        Snake::new(pos, Right, 0.05)
     }
 
     /// Add a new segment to the end of the snake
     pub fn add_segment(&mut self) {
-        let dir = *self.tail.last();
+        let dir = *self.tail.last().unwrap_or(&Right);
         self.tail.push(dir);
     }
 
@@ -53,7 +53,7 @@ impl Snake {
     /// the last update.
     pub fn update(&mut self, elapsed_time: f32) {
         self.wait_time += elapsed_time;
-        if (self.wait_time >= self.move_delay) {
+        if self.wait_time >= self.move_delay {
             self.wait_time -= self.move_delay;
 
             // Move the head based on the direction
@@ -65,7 +65,7 @@ impl Snake {
             }
 
             // Move the rest of the components
-            for i in range(1, self.tail.len()).invert() {
+            for i in range(1, self.tail.len()).rev() {
                 self.tail[i] = self.tail[i-1];
             }
             self.tail[0] = self.next_move;
@@ -85,8 +85,8 @@ impl Snake {
     pub fn check_collision(&self, map_width: u32, map_height: u32,
             walls: &[Point]) -> bool {
         // Check map bounds
-        if (self.pos.x < 0 || self.pos.y < 0 ||
-                self.pos.x >= map_width as i32|| self.pos.y >= map_height as i32) {
+        if self.pos.x < 0 || self.pos.y < 0 ||
+                self.pos.x >= map_width as i32|| self.pos.y >= map_height as i32 {
             return true;
         }
 
