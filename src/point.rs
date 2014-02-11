@@ -27,20 +27,19 @@ impl Sub<Point, Point> for Point {
 #[cfg(test)]
 mod tests {
     use super::*;
-   
+
     #[test]
     fn test_eq() {
         assert!(Point::new(1, 1) == Point::new(1, 1));
     }
-    
+
     #[test]
     fn test_add() {
         assert_eq!(Point::new(1, 1) + Point::new(2, 1), Point::new(3, 2));
     }
-    
+
     #[test]
     fn test_sub() {
         assert_eq!(Point::new(1, 1) - Point::new(1, 1), Point::new(0, 0));
     }
-    
 }
