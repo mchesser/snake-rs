@@ -37,17 +37,17 @@ impl Game {
     pub fn draw(&mut self, renderer: &mut render::Renderer) {
         // Draw fruit
         renderer.set_draw_color(Color::RGB(0xAA, 0x30, 0x30));
-        renderer.fill_rect(self.point_to_rect(self.fruit));
+        renderer.fill_rect(self.point_to_rect(self.fruit)).unwrap();
 
         // Draw snakes
         renderer.set_draw_color(Color::RGB(0x60, 0xAA, 0x60));
         for snake in self.snakes.iter() {
             let head = snake.get_head();
-            renderer.fill_rect(self.point_to_rect(head));
+            renderer.fill_rect(self.point_to_rect(head)).unwrap();
 
             let tail_components = snake.tail_to_points();
             for &component in tail_components.iter() {
-                renderer.fill_rect(self.point_to_rect(component));
+                renderer.fill_rect(self.point_to_rect(component)).unwrap();
             }
         }
     }
@@ -58,12 +58,12 @@ impl Game {
             self.grid_size as i32 * point.y,
             self.grid_size,
             self.grid_size,
-        ).unwrap().unwrap()
+        )
     }
 
     /// Updates the game using the time elapsed since the last update
     pub fn update(&mut self, elapsed_time: f32) {
-        for i in (0 .. self.snakes.len()) {
+        for i in 0..self.snakes.len() {
             self.snakes[i].update(elapsed_time);
             let collision = self.snakes[i].check_collision(self.width, self.height,
                 &self.snakes[i].tail_to_points());
