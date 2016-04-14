@@ -44,8 +44,8 @@ impl Snake {
 
     /// Add a new segment to the end of the snake
     pub fn add_segment(&mut self) {
-        let dir = *self.tail.last().unwrap_or(&Move::Right);
-        self.tail.push(dir);
+        let tail = *self.tail.last().unwrap_or(&Move::Right);
+        self.tail.push(tail);
     }
 
     /// Update the snake's position based on the amount of time elapsed since
@@ -113,7 +113,7 @@ impl Snake {
         // Note: segment directions point to the position of the next block, not
         // the position of next block to the segment.
         let mut next = self.pos;
-        for segment in self.tail.iter() {
+        for segment in &self.tail {
             next = match *segment {
                 Move::Up    => next + Vec2::new(0, 1),
                 Move::Down  => next + Vec2::new(0, -1),

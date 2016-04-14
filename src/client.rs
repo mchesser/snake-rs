@@ -13,6 +13,8 @@ pub const SCREEN_WIDTH: u32 = 800;
 pub const SCREEN_HEIGHT: u32 = 600;
 pub const GRID_SIZE: u32 = 20;
 
+const TARGET_TIME_STEP: u64 = 16666667;
+
 pub fn run() -> Result<(), String> {
     const WHITE: Color = Color::RGB(0xFF, 0xFF, 0xFF);
 
@@ -49,7 +51,6 @@ pub fn run() -> Result<(), String> {
         frame_time += current_time - prev_time;
         prev_time = current_time;
 
-        const TARGET_TIME_STEP: u64 = 16666667;
         while frame_time >= TARGET_TIME_STEP {
             frame_time -= TARGET_TIME_STEP;
             game.update(TARGET_TIME_STEP as f32 / 1000_000_000.0);
