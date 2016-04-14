@@ -1,5 +1,3 @@
-#![feature(duration, thread_sleep)]
-
 extern crate sdl2;
 extern crate basic2d;
 extern crate rand;
