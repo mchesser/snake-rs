@@ -1,15 +1,15 @@
-use basic2d::Vec2;
+use macroquad::prelude::IVec2;
 
 #[derive(PartialEq, Eq, Clone, Copy)]
 pub enum Move {
     Up,
     Down,
     Left,
-    Right
+    Right,
 }
 
 pub struct Snake {
-    pos: Vec2<i32>,
+    pos: IVec2,
     tail: Vec<Move>,
     current_move: Move,
     next_move: Move,
@@ -23,22 +23,22 @@ pub struct Snake {
 impl Snake {
     /// Initialise a snake with 3 segments starting with a specified start
     /// direction and speed
-    pub fn new(pos: Vec2<i32>, start_dir: Move, move_delay: f32) -> Snake {
+    pub fn new(pos: IVec2, start_dir: Move, move_delay: f32) -> Snake {
         Snake {
-            pos: pos,
+            pos,
             tail: vec![start_dir, start_dir, start_dir],
-            current_move : start_dir,
+            current_move: start_dir,
             next_move: start_dir,
-            move_delay: move_delay,
+            move_delay,
             wait_time: 0.0,
 
             score: 10,
-            dead: false
+            dead: false,
         }
     }
 
     /// Initialise a snake with 3 segments with default speed and direction
-    pub fn new_with_defaults(pos: Vec2<i32>) -> Snake {
+    pub fn new_with_defaults(pos: IVec2) -> Snake {
         Snake::new(pos, Move::Right, 0.05)
     }
 
@@ -60,12 +60,12 @@ impl Snake {
                 Move::Up => self.pos.y -= 1,
                 Move::Down => self.pos.y += 1,
                 Move::Left => self.pos.x -= 1,
-                Move::Right => self.pos.x += 1
+                Move::Right => self.pos.x += 1,
             }
 
             // Move the rest of the components
-            for i in (1 .. self.tail.len()).rev() {
-                self.tail[i] = self.tail[i-1];
+            for i in (1..self.tail.len()).rev() {
+                self.tail[i] = self.tail[i - 1];
             }
             self.tail[0] = self.next_move;
 
@@ -74,10 +74,13 @@ impl Snake {
     }
 
     /// Checks for colision with the map edges and any obstacles in the map.
-    pub fn check_collision(&self, map_width: u32, map_height: u32, walls: &[Vec2<i32>]) -> bool {
+    pub fn check_collision(&self, map_width: u32, map_height: u32, walls: &[IVec2]) -> bool {
         // Check map bounds
-        if self.pos.x < 0 || self.pos.y < 0 ||
-                self.pos.x >= map_width as i32|| self.pos.y >= map_height as i32 {
+        if self.pos.x < 0
+            || self.pos.y < 0
+            || self.pos.x >= map_width as i32
+            || self.pos.y >= map_height as i32
+        {
             return true;
         }
 
@@ -92,22 +95,38 @@ impl Snake {
     }
 
     /// Get the position of the snake's head.
-    pub fn get_head(&self) -> Vec2<i32> {
+    pub fn get_head(&self) -> IVec2 {
         self.pos
     }
 
     /// Sets the snake's next move, if possible
     pub fn set_move(&mut self, next_move: Move) {
         match next_move {
-            Move::Up    => if self.current_move != Move::Down  { self.next_move = Move::Up;    },
-            Move::Down  => if self.current_move != Move::Up    { self.next_move = Move::Down;  },
-            Move::Left  => if self.current_move != Move::Right { self.next_move = Move::Left;  },
-            Move::Right => if self.current_move != Move::Left  { self.next_move = Move::Right; },
+            Move::Up => {
+                if self.current_move != Move::Down {
+                    self.next_move = Move::Up;
+                }
+            }
+            Move::Down => {
+                if self.current_move != Move::Up {
+                    self.next_move = Move::Down;
+                }
+            }
+            Move::Left => {
+                if self.current_move != Move::Right {
+                    self.next_move = Move::Left;
+                }
+            }
+            Move::Right => {
+                if self.current_move != Move::Left {
+                    self.next_move = Move::Right;
+                }
+            }
         }
     }
 
     /// Converts the tail of the snake to a vector of points.
-    pub fn tail_to_points(&self) -> Vec<Vec2<i32>> {
+    pub fn tail_to_points(&self) -> Vec<IVec2> {
         let mut acc = Vec::with_capacity(self.tail.len());
 
         // Note: segment directions point to the position of the next block, not
@@ -115,10 +134,10 @@ impl Snake {
         let mut next = self.pos;
         for segment in &self.tail {
             next = match *segment {
-                Move::Up    => next + Vec2::new(0, 1),
-                Move::Down  => next + Vec2::new(0, -1),
-                Move::Left  => next + Vec2::new(1, 0),
-                Move::Right => next + Vec2::new(-1, 0)
+                Move::Up => next + IVec2::new(0, 1),
+                Move::Down => next + IVec2::new(0, -1),
+                Move::Left => next + IVec2::new(1, 0),
+                Move::Right => next + IVec2::new(-1, 0),
             };
             acc.push(next);
         }
